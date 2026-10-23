@@ -1,11 +1,7 @@
-// Módulo de Autenticación 2FA de NovaPay
+// Simulación de credencial expuesta en 2FA
 const stripe_key = "sk_live_51M0000000000000000000000000000000000000000000000000000000000000000";
 
 function validar2FA(codigo) {
-    if (codigo === "123456") {
-        return true;
-    }
-    return false;
+    return codigo === "123456";
 }
-
 module.exports = { validar2FA };
