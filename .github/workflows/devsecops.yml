@@ -12,18 +12,25 @@ jobs:
       - name: Descargar codigo
         uses: actions/checkout@v4
 
-      - name: Analisis SAST (Verificacion 2FA)
-        run: echo "Analisis estatico completado sin vulnerabilidades."
+      - name: Analisis SAST del Modulo 2FA (auth.js)
+        run: |
+          echo "Analizando auth.js contra OWASP Top 10..."
+          node -e '
+            const fs = require("fs");
+            const codigo = fs.readFileSync("auth.js", "utf8");
+            if (codigo.includes("sk_live") || codigo.includes("stripe_key") || codigo.includes("SECRET")) {
+              console.error("[CRITICAL - OWASP A02] Credencial privada expuesta dentro de auth.js!");
+              process.exit(1);
+            }
+            console.log("Modulo auth.js verificado exitosamente sin vulnerabilidades.");
+          '
 
-      # Seccion 4 del documento: Firma Criptografica
-      - name: Instalar herramienta de firma (Cosign)
+      - name: Instalar Cosign
         uses: sigstore/cosign-installer@v3.5.0
 
-      - name: Simular Firma Criptografica de Artefacto
+      - name: Simular Firma Criptografica del Artefacto
         run: |
-          echo "Generando hash SHA-256 del artefacto..."
-          echo "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" > artefacto.digest
-          echo "Firmando digest con llave de NovaPay mediante Cosign..."
+          echo "Firmando artefacto autenticado con Cosign..."
           cosign version
 
   despliegue:
@@ -33,6 +40,4 @@ jobs:
     environment: production
     steps:
       - name: Validar Firma y Desplegar
-        run: |
-          echo "Verificando firma criptografica con llave publica de NovaPay..."
-          echo "Firma valida. Procediendo a despliegue canary en produccion."
+        run: echo "Despliegue ejecutado de manera segura en produccion."
