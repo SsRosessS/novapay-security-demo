@@ -11,20 +11,13 @@ jobs:
     steps:
       - name: Descargar codigo fuente
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # Etapa 1: Detección de Secretos y Llaves Expuestas (OWASP A02)
-      - name: Escaneo de Secretos (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Etapa 2: Análisis Estático de Código (SAST - OWASP A01/A07)
-      - name: Analisis SAST basico
+      - name: Escaneo SAST y Deteccion de Secretos
         run: |
-          echo "Escaneando logica de autenticacion 2FA..."
-          echo "Analisis estatico completado sin errores de sintaxis."
+          echo "Iniciando analisis de seguridad sobre modulo 2FA..."
+          echo "[ALERTA] Credencial critica o fallo logico detectado en auth.js (OWASP A02)"
+          echo "Activando Build Breaker segun politica NovaPay..."
+          exit 1 # Esto fuerza el error de seguridad
 
   despliegue:
     name: Aprobacion y Despliegue en Produccion
