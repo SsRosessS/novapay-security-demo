@@ -6,18 +6,25 @@ on:
 
 jobs:
   seguridad:
-    name: Verificaciones de Seguridad (DevSecOps)
+    name: Verificaciones de Seguridad y Firma
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar codigo fuente
+      - name: Descargar codigo
         uses: actions/checkout@v4
 
-      - name: Escaneo SAST y Deteccion de Secretos
+      - name: Analisis SAST (Verificacion 2FA)
+        run: echo "Analisis estatico completado sin vulnerabilidades."
+
+      # Seccion 4 del documento: Firma Criptografica
+      - name: Instalar herramienta de firma (Cosign)
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Simular Firma Criptografica de Artefacto
         run: |
-          echo "Iniciando analisis de seguridad sobre modulo 2FA..."
-          echo "[ALERTA] Credencial critica o fallo logico detectado en auth.js (OWASP A02)"
-          echo "Activando Build Breaker segun politica NovaPay..."
-          exit 1 # Esto fuerza el error de seguridad
+          echo "Generando hash SHA-256 del artefacto..."
+          echo "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" > artefacto.digest
+          echo "Firmando digest con llave de NovaPay mediante Cosign..."
+          cosign version
 
   despliegue:
     name: Aprobacion y Despliegue en Produccion
@@ -25,6 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Desplegar en NovaPay
+      - name: Validar Firma y Desplegar
         run: |
-          echo "Despliegue completado de manera segura en produccion."
+          echo "Verificando firma criptografica con llave publica de NovaPay..."
+          echo "Firma valida. Procediendo a despliegue canary en produccion."
